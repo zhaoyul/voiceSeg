@@ -142,20 +142,34 @@ appid = '20170721000065533'
 secretKey = 'xfI4YwH9Hh8jhobg1qjV'
 
 def speech_synthesis(text, lang, output_file_name):
-    #print("------------")
-    #print(text + " " + lang + " " + output_file_name)
-    text2WavResult  = aipSpeech.synthesis(text, 'zh', 1, {
-        'vol': 5,
-    })
+    if(lang == 'en' or lang == 'ch'):
+        #print("------------")
+        #print(text + " " + lang + " " + output_file_name)
+        text2WavResult  = aipSpeech.synthesis(text, 'zh', 1, {
+            'vol': 5,
+        })
 
-    # 识别正确返回语音二进制 错误则返回dict 参照下面错误码
-    mp3_file = output_file_name.replace('.wav', '.mp3')
-    if not isinstance(text2WavResult, dict):
-        with open(mp3_file, 'wb') as f:
-            f.write(text2WavResult)
-        call(["ffmpeg","-i", mp3_file, output_file_name] )
+        # 识别正确返回语音二进制 错误则返回dict 参照下面错误码
+        mp3_file = output_file_name.replace('.wav', '.mp3')
+        if not isinstance(text2WavResult, dict):
+            with open(mp3_file, 'wb') as f:
+                f.write(text2WavResult)
+            call(["ffmpeg","-i", mp3_file, output_file_name] )
+        else:
+           print (text2WavResult)
     else:
-       print (text2WavResult)
+        internal_lang = 'zh-CN'
+        if(lang == 'kor'):
+          internal_lang = 'ko-KR'
+        if(lang == 'jp'):
+          internal_lang = 'ja-JP'
+        if(lang == 'cn'):
+          internal_lang = 'zh-CN'
+        if(lang == 'en'):
+          internal_lang = 'en-US'
+        call(["java","-jar=TTSSample.jar", text, internal_lang,  output_file_name] )
+
+
 q = None
 if(fromLang == 'en' or fromLang == 'zh'):
     q = baidu_rec(wav_file, fromLang)
