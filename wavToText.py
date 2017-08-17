@@ -167,7 +167,8 @@ def speech_synthesis(text, lang, output_file_name):
           internal_lang = 'zh-CN'
         if(lang == 'en'):
           internal_lang = 'en-US'
-        call(["java","-jar=TTSSample.jar", text, internal_lang,  output_file_name] )
+        print(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name])
+        call(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name] )
 
 
 q = None
