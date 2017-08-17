@@ -26,6 +26,74 @@ else:
   #call(["ffmpeg","-loglevel","16", "-i", wav_file, "-af", "volume=5", "bigger"+wav_file] )
   #call(["mv", "bigger"+wav_file, wav_file])
 
+import requests
+################################
+def getToken():
+    # Request
+    # POST https://api.cognitive.microsoft.com/sts/v1.0/issueToken
+
+    try:
+        response = requests.post(
+            url="https://api.cognitive.microsoft.com/sts/v1.0/issueToken",
+            headers={
+                "Ocp-Apim-Subscription-Key": "006f1cd905e3457a8c565c50f9147a41",
+                "Content-type": "application/x-www-form-urlencoded",
+            },
+            data={
+            },
+        )
+#         print('Response HTTP Status Code: {status_code}'.format(
+#             status_code=response.status_code))
+#         print('Response HTTP Response Body: {content}'.format(
+#             content=response.content))
+        return response.content
+    except requests.exceptions.RequestException:
+        print('HTTP Request failed')
+        
+
+# 	ko-KR	Korean (Korea)
+#       ja-JP	Japanese (Japan)
+#       zh-CN	Chinese (Mandarin, simplified)
+#       en-US	English (United States)
+
+
+def reg_wav(wav_file, lang):
+
+    internal_lang = 'zh-CN'
+    if(lang == 'kor'):
+      internal_lang = 'ko-KR'
+    if(lang == 'jp'):
+      internal_lang = 'ja-JP'
+    if(lang == 'cn'):
+      internal_lang = 'zh-CN'
+    if(lang == 'en'):
+      internal_lang = 'en-US'
+
+      
+    auth_code = getToken()
+      
+    try:
+        response = requests.post(
+            url="https://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1",
+            params={
+                "language": internal_lang,
+                "locale": "your_locale",
+                "format": "your_format",
+                "requestid": "your_guid",
+            },
+            headers={
+                "Authorization": auth_code,
+                "Content-type": "audio/wav; codec=\"audio/pcm\"; samplerate=16000",
+            },
+            files = {'file': open(wav_file, 'rb')},
+        )
+        print('Response HTTP Status Code: {status_code}'.format(
+            status_code=response.status_code))
+        print('Response HTTP Response Body: {content}'.format(
+            content=response.content))
+    except requests.exceptions.RequestException:
+        print('HTTP Request failed')
+
 from aip import AipSpeech
 
 APP_ID = '9909545'
@@ -56,12 +124,13 @@ except Exception as e:
 
 print (first_result)
 
+
+
 ################################j译 
 #import sys  
 #reload(sys)  
 #sys.setdefaultencoding('utf8')   
 
-import requests
 import urllib
 import random
 import hashlib

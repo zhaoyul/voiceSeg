@@ -28,7 +28,7 @@ LOG_FILE="$CALL_ID"_sclice.log
 RESULT_FILE="$CALL_ID"_result.log
 > $LOG_FILE
 > $RESULT_FILE
-rm -rf $CALL_ID"_"*wav
+rm -rf $CALL_ID"_"*wav $CALL_ID"_"*mp3
 if [ ! -f $WAV_FILE ]
   then
     echo "`pwd`/$WAV_FILE not found "
