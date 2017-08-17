@@ -1,0 +1,7 @@
+*.wav
+*.log
+*.mp3
+*.swp
+*.swo
+*.bk
+logs/*
