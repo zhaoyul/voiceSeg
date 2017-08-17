@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-  
+# -*- coding: utf-8 -*-
 import sys
 import requests
 from subprocess import call
@@ -18,7 +18,7 @@ if len(sys.argv) <= 3:
   print ("必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言")
   sys.exit(1)
 else:
-  wav_file = sys.argv[1].strip('\r');  
+  wav_file = sys.argv[1].strip('\r');
   tran_wav_file = wav_file.replace('.wav', '_tran.wav')
   fromLang = sys.argv[2]
   toLang = sys.argv[3]
@@ -49,7 +49,7 @@ def getToken():
         return response.content
     except requests.exceptions.RequestException:
         print('HTTP Request failed')
-        
+
 
 # 	ko-KR	Korean (Korea)
 #       ja-JP	Japanese (Japan)
@@ -57,7 +57,7 @@ def getToken():
 #       en-US	English (United States)
 
 
-def reg_wav(wav_file, lang):
+def ms_reg(wav_file, lang):
 
     internal_lang = 'zh-CN'
     if(lang == 'kor'):
@@ -69,9 +69,9 @@ def reg_wav(wav_file, lang):
     if(lang == 'en'):
       internal_lang = 'en-US'
 
-      
+
     auth_code = getToken()
-      
+
     try:
         response = requests.post(
             url="https://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1",
@@ -91,11 +91,12 @@ def reg_wav(wav_file, lang):
             status_code=response.status_code))
         print('Response HTTP Response Body: {content}'.format(
             content=response.content))
+        return response.content.DisplayText
+
     except requests.exceptions.RequestException:
         print('HTTP Request failed')
 
 from aip import AipSpeech
-
 APP_ID = '9909545'
 API_KEY = 'BtgyKlo673yQ5olb2QX5GXZn'
 SECRET_KEY = 'zhs41IHDIxGDdAnaEnw5xu18FC6Xr4Lq'
@@ -106,30 +107,32 @@ def get_file_content(filePath):
     with open(filePath, 'rb') as fp:
         return fp.read()
 
-# TODO: should parameterize the languages.
-result_dict = aipSpeech.asr(get_file_content(wav_file), 'wav', 16000, {
-    'lan': fromLang,
-})
+def baidu_rec(current_wav_file, lang):
+    # TODO: should parameterize the languages.
+    result_dict = aipSpeech.asr(get_file_content(current_wav_file), 'wav', 16000, {
+        'lan': lang,
+    })
 
-#if result_dict is None or len(result_dict["result"]) == 0:
-#  print ("baidu 解析没有结果, 退出")
-#  sys.exit(0)
+    #if result_dict is None or len(result_dict["result"]) == 0:
+    #  print ("baidu 解析没有结果, 退出")
+    #  sys.exit(0)
 
-try:
-    first_result =  result_dict["result"][0]#.decode("UTF-8") 
-except Exception as e:
-    print ("baidu 解析:(%s)没有结果, 退出!" %(wav_file))
-    sys.exit(0)
-
-
-print (first_result)
+    try:
+        first_result =  result_dict["result"][0]#.decode("UTF-8")
+    except Exception as e:
+        print ("baidu 解析:(%s)没有结果, 退出!" %(current_wav_file))
+        sys.exit(0)
 
 
+    print (first_result)
+    return first_result
 
-################################j译 
-#import sys  
-#reload(sys)  
-#sys.setdefaultencoding('utf8')   
+
+
+################################j译
+#import sys
+#reload(sys)
+#sys.setdefaultencoding('utf8')
 
 import urllib
 import random
@@ -144,17 +147,20 @@ def speech_synthesis(text, lang, output_file_name):
     text2WavResult  = aipSpeech.synthesis(text, 'zh', 1, {
         'vol': 5,
     })
-    
+
     # 识别正确返回语音二进制 错误则返回dict 参照下面错误码
     mp3_file = output_file_name.replace('.wav', '.mp3')
     if not isinstance(text2WavResult, dict):
         with open(mp3_file, 'wb') as f:
-            f.write(text2WavResult)    
+            f.write(text2WavResult)
         call(["ffmpeg","-i", mp3_file, output_file_name] )
     else:
        print (text2WavResult)
-
-q = first_result
+q = None
+if(fromLang == 'en' or fromLang == 'zh'):
+    q = baidu_rec(wav_file, fromLang)
+else:
+    q = ms_reg(wav_file, fromLang)
 salt = random.randint(32768, 65536)
 
 sign = (appid+q+str(salt)+secretKey).encode('utf-8')
