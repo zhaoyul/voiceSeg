@@ -7,6 +7,27 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+def lang_mapping(baidu_lang):
+   internal_lang = 'zh-CN'
+   if(lang == 'kor'):
+     internal_lang = 'ko-KR'
+   if(lang == 'jp'):
+     internal_lang = 'ja-JP'
+   if(lang == 'cn'):
+     internal_lang = 'zh-CN'
+   if(lang == 'en'):
+     internal_lang = 'en-US'
+   if(lang == 'de'):
+     internal_lang = 'de-DE'
+   if(lang == 'fr'):
+     internal_lang = 'fr-FR'
+   if(lang == 'spa'):
+     internal_lang = 'es-ES'
+   if(lang == 'ru'):
+     internal_lang = 'ru-RU'
+   if(lang == 'it'):
+     internal_lang = 'it-RU'
+   return internal_lang
 
 wav_file=''
 tran_wav_file=''
@@ -59,15 +80,7 @@ def getToken():
 
 def ms_reg(wav_file, lang):
 
-    internal_lang = 'zh-CN'
-    if(lang == 'kor'):
-      internal_lang = 'ko-KR'
-    if(lang == 'jp'):
-      internal_lang = 'ja-JP'
-    if(lang == 'cn'):
-      internal_lang = 'zh-CN'
-    if(lang == 'en'):
-      internal_lang = 'en-US'
+    internal_lang = lang_mapping(lang)
 
 
     auth_code = getToken()
@@ -158,15 +171,8 @@ def speech_synthesis(text, lang, output_file_name):
         else:
            print (text2WavResult)
     else:
-        internal_lang = 'zh-CN'
-        if(lang == 'kor'):
-          internal_lang = 'ko-KR'
-        if(lang == 'jp'):
-          internal_lang = 'ja-JP'
-        if(lang == 'cn'):
-          internal_lang = 'zh-CN'
-        if(lang == 'en'):
-          internal_lang = 'en-US'
+        internal_lang = lang_mapping(lang)
+
         print(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name])
         call(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name] )
 

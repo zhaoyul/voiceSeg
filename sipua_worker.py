@@ -53,7 +53,7 @@ class MyAccountCallback(pj.AccountCallback):
             print self.account.info().uri, "register ok", self.account.info().reg_expires
             #ua_status = "register succ"
         elif self.account.info().reg_status > 200:
-            print self.account.info().uri, "register fail :", self.account.info().reg_status, 
+            print self.account.info().uri, "register fail :", self.account.info().reg_status,
             print self.account.info().reg_reason, self.account.info().reg_active, self.account.info().reg_expires
             #ua_status = "register fail"
 
@@ -70,7 +70,7 @@ class MyAccountCallback(pj.AccountCallback):
         print "Incoming call from: ", call.info().remote_uri
         from_addr = call.info().remote_uri.split('<')[1].split('>')[0]
         print from_addr
-        print "Incoming call contact: ", call.info().remote_contact 
+        print "Incoming call contact: ", call.info().remote_contact
         #print "Incoming call req url: ", call.info().contact
         print "Incoming call callid: ", call.info().sip_call_id
         current_callid = call.info().sip_call_id
@@ -121,7 +121,7 @@ class MyCallCallback(pj.CallCallback):
         if self.call.info().state == pj.CallState.DISCONNECTED:
             current_call = None
             current_callid = None
-            print 'Current call is', current_call
+            print 'DISCONNECTED call is', current_call
             ua_status = "call disconnected"
             pj.Lib.instance().recorder_destroy(self.rec_id)
             #exit_flag = True
@@ -130,7 +130,7 @@ class MyCallCallback(pj.CallCallback):
             call(["mkdir", "-p", "./wav/"+targetdir])
             src = "./"+username+"*"
             dst = "./wav/"+targetdir+"/"
-            call('cp -r %s %s'%(src, dst), shell=True) 
+            call('cp -r %s %s'%(src, dst), shell=True)
             if output:
                 os.killpg(os.getpgid(output.pid), signal.SIGKILL)
                 print "kill sclice [", output.pid, "]"
@@ -146,9 +146,9 @@ class MyCallCallback(pj.CallCallback):
 
             recv_name = username + ".wav"
             self.rec_id = pj.Lib.instance().create_recorder(recv_name)
-            rec_slot = pj.Lib.instance().recorder_get_slot(self.rec_id)       
+            rec_slot = pj.Lib.instance().recorder_get_slot(self.rec_id)
             pj.Lib.instance().conf_connect(call_slot, rec_slot)
- 
+
             #play_name = "input.wav"
             #play_id = pj.Lib.instance().create_player(play_name, True)
             #play_slot = pj.Lib.instance().player_get_slot(play_id)
@@ -168,8 +168,9 @@ class MyBuddyCallback(pj.BuddyCallback):
         pj.BuddyCallback.__init__(self, buddy)
 
     def on_state(self):
-        print "Buddy", self.buddy.info().uri, "is",
-        print self.buddy.info().online_text
+        pass
+        #print "Buddy", self.buddy.info().uri, "is",
+        #print self.buddy.info().online_text
 
     def on_pager(self, mime_type, body):
         print "Instant message from", self.buddy.info().uri,
@@ -258,11 +259,13 @@ def ua_playback(text):
     wtime = (1.0 * wfile.getnframes()) / wfile.getframerate()
     print wtime, media_file
     wfile.close()
-    wav_player_id=lib.instance().create_player(media_file, False)
-    wav_slot=lib.instance().player_get_slot(wav_player_id)
-    lib.instance().conf_connect(wav_slot, call_slot)
-    time.sleep(wtime)
-    lib.instance().player_destroy(wav_player_id)
+    #avoid too short wav
+    if wtime > 0.2:
+        wav_player_id=lib.instance().create_player(media_file, False)
+        wav_slot=lib.instance().player_get_slot(wav_player_id)
+        lib.instance().conf_connect(wav_slot, call_slot)
+        time.sleep(wtime)
+        lib.instance().player_destroy(wav_player_id)
 
 def onsignal_term(a, b):
     global output
@@ -345,7 +348,7 @@ try:
                     h_file.close()
                     fsize = current_fsize
                 time.sleep(0.5)
-                
+
     #clean up
     if ua_buddy:
         ua_buddy = None
