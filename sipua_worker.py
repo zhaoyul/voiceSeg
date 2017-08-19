@@ -25,6 +25,8 @@ current_callid = None
 exit_flag = False
 output = None
 call_slot = None
+lan_source = ""
+lan_target = ""
 
 # Logging callback
 def log_cb(level, str, len):
@@ -43,6 +45,8 @@ class MyAccountCallback(pj.AccountCallback):
     global ua_buddy
     global buddy_uri
     global acc
+    global lan_source
+    global lan_target
 
     def __init__(self, account=None):
         pj.AccountCallback.__init__(self, account)
@@ -63,11 +67,20 @@ class MyAccountCallback(pj.AccountCallback):
         global acc
         global ua_buddy
         global buddy_uri
+        global lan_source
+        global lan_target
         if current_call:
             call.answer(486, "Busy")
             return
 
         print "Incoming call from: ", call.info().remote_uri
+        lan_array = call.info().remote_uri.split('"')[1].split('_')
+        if len(lan_array) > 2:
+            lan_source = lan_array[1]
+            lan_target = lan_array[2]
+            print "Incoming call language: ", lan_source, lan_target
+        else:
+            print "Incoming call language: ", "No Language Info"
         from_addr = call.info().remote_uri.split('<')[1].split('>')[0]
         print from_addr
         print "Incoming call contact: ", call.info().remote_contact
@@ -255,17 +268,20 @@ def ua_playback(text):
     global lib
     global call_slot
     media_file = text.encode('utf-8')
-    wfile = wave.open(media_file)
-    wtime = (1.0 * wfile.getnframes()) / wfile.getframerate()
-    print wtime, media_file
-    wfile.close()
-    #avoid too short wav
-    if wtime > 0.2:
-        wav_player_id=lib.instance().create_player(media_file, False)
-        wav_slot=lib.instance().player_get_slot(wav_player_id)
-        lib.instance().conf_connect(wav_slot, call_slot)
-        time.sleep(wtime)
-        lib.instance().player_destroy(wav_player_id)
+    if os.path.exists(media_file) == True:
+        wfile = wave.open(media_file)
+        wtime = (1.0 * wfile.getnframes()) / wfile.getframerate()
+        print wtime, media_file
+        wfile.close()
+        #avoid too short wav
+        if wtime > 0.2:
+            wav_player_id=lib.instance().create_player(media_file, False)
+            wav_slot=lib.instance().player_get_slot(wav_player_id)
+            lib.instance().conf_connect(wav_slot, call_slot)
+            time.sleep(wtime)
+            lib.instance().player_destroy(wav_player_id)
+    else:
+        print "[Error] no such translated file:", media_file
 
 def onsignal_term(a, b):
     global output
@@ -319,6 +335,7 @@ try:
             print "start to translate..."
             #ua_status = "test"
             #output = Popen("./sclice.sh %s"%(username), shell=True, preexec_fn=os.setsid)
+            print "prepare sclice:", lan_source, lan_target
             output = Popen("./sclice.sh %s %s %s"%(username, lan_source, lan_target), shell=True, preexec_fn=os.setsid)
             ua_status = "Translate"
         elif ua_status == "Translate":

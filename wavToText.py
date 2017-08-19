@@ -9,23 +9,23 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def lang_mapping(baidu_lang):
    internal_lang = 'zh-CN'
-   if(lang == 'kor'):
+   if(baidu_lang == 'kor'):
      internal_lang = 'ko-KR'
-   if(lang == 'jp'):
+   if(baidu_lang == 'jp'):
      internal_lang = 'ja-JP'
-   if(lang == 'cn'):
+   if(baidu_lang == 'cn'):
      internal_lang = 'zh-CN'
-   if(lang == 'en'):
+   if(baidu_lang == 'en'):
      internal_lang = 'en-US'
-   if(lang == 'de'):
+   if(baidu_lang == 'de'):
      internal_lang = 'de-DE'
-   if(lang == 'fr'):
+   if(baidu_lang == 'fr'):
      internal_lang = 'fr-FR'
-   if(lang == 'spa'):
+   if(baidu_lang == 'spa'):
      internal_lang = 'es-ES'
-   if(lang == 'ru'):
+   if(baidu_lang == 'ru'):
      internal_lang = 'ru-RU'
-   if(lang == 'it'):
+   if(baidu_lang == 'it'):
      internal_lang = 'it-RU'
    return internal_lang
 
