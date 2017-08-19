@@ -104,7 +104,13 @@ def ms_reg(wav_file, lang):
             status_code=response.status_code))
         print('Response HTTP Response Body: {content}'.format(
             content=response.content))
-        return response.content.DisplayText
+        if (response.ok):
+            rsp_dict = response.json()
+            if(rsp_dict["Duration"] > 0)
+                return rsp_dict["DisplayText"]
+            else:
+                print ("ms 解析:(%s)没有结果, 退出!" %(current_wav_file))
+                sys.exit(0)
 
     except requests.exceptions.RequestException:
         print('HTTP Request failed')
