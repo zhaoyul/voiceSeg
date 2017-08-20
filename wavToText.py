@@ -106,7 +106,7 @@ def ms_reg(wav_file, lang):
             content=response.content))
         if (response.ok):
             rsp_dict = response.json()
-            if(rsp_dict["Duration"] > 0)
+            if(rsp_dict["Duration"] > 0):
                 return rsp_dict["DisplayText"]
             else:
                 print ("ms 解析:(%s)没有结果, 退出!" %(current_wav_file))
