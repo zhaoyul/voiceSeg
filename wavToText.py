@@ -26,7 +26,7 @@ def lang_mapping(baidu_lang):
    if(baidu_lang == 'ru'):
      internal_lang = 'ru-RU'
    if(baidu_lang == 'it'):
-     internal_lang = 'it-RU'
+     internal_lang = 'it-IT'
    return internal_lang
 
 wav_file=''
