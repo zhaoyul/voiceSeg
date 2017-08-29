@@ -165,7 +165,7 @@ def speech_synthesis(text, lang, output_file_name):
         #print("------------")
         #print(text + " " + lang + " " + output_file_name)
         text2WavResult  = aipSpeech.synthesis(text, 'zh', 1, {
-            'vol': 5,
+            'vol': 1,
         })
 
         # 识别正确返回语音二进制 错误则返回dict 参照下面错误码

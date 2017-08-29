@@ -336,35 +336,48 @@ try:
             #ua_status = "test"
             #output = Popen("./sclice.sh %s"%(username), shell=True, preexec_fn=os.setsid)
             print "prepare sclice:", lan_source, lan_target
+            binfile = "%s_result.log"%(username)
+            if os.path.exists(binfile) == True:
+                h_file = open(binfile, "r+")
+                h_file.truncate()
+                h_file.close()
+
             output = Popen("./sclice.sh %s %s %s"%(username, lan_source, lan_target), shell=True, preexec_fn=os.setsid)
             ua_status = "Translate"
         elif ua_status == "Translate":
             binfile = "%s_result.log"%(username)
-            fsize = os.stat(binfile).st_size
-            print "current size:", fsize
-            h_file = open(binfile)
-            for line in h_file.readlines():
-                ua_sendmsg(getSrc(line))
-                time.sleep(0.1)
-                ua_sendmsg(getDst(line))
-                time.sleep(0.1)
-                ua_playback(getWav(line))
-            h_file.close()
+            #fsize = os.stat(binfile).st_size
+            #print "current size:", fsize
+
+            fsize = 0
+            #if os.path.exists(binfile) == True:
+            #    h_file = open(binfile, "r+")
+            #    h_file.truncate()
+            #    h_file.close()
+
+            #for line in h_file.readlines():
+            #    ua_sendmsg(getSrc(line))
+            #    time.sleep(0.1)
+            #    ua_sendmsg(getDst(line))
+            #    time.sleep(0.1)
+            #    ua_playback(getWav(line))
+            #h_file.close()
             while ua_status == "Translate":
-                current_fsize = os.stat(binfile).st_size
-                if current_fsize > fsize:
-                    print "current size:", current_fsize, "old size:", fsize
-                    h_file = open(binfile)
-                    h_file.seek(fsize)
-                    for line in h_file.readlines():
-                        ua_sendmsg(getSrc(line))
-                        time.sleep(0.1)
-                        ua_sendmsg(getDst(line))
-                        time.sleep(0.1)
-                        ua_playback(getWav(line))
-                    h_file.close()
-                    fsize = current_fsize
-                time.sleep(0.5)
+                if os.path.exists(binfile) == True:
+                    current_fsize = os.stat(binfile).st_size
+                    if current_fsize > fsize:
+                        print "current size:", current_fsize, "old size:", fsize
+                        h_file = open(binfile)
+                        h_file.seek(fsize)
+                        for line in h_file.readlines():
+                            ua_sendmsg(getSrc(line))
+                            time.sleep(0.1)
+                            ua_sendmsg(getDst(line))
+                            time.sleep(0.1)
+                            ua_playback(getWav(line))
+                        h_file.close()
+                        fsize = current_fsize
+                time.sleep(0.2)
 
     #clean up
     if ua_buddy:
