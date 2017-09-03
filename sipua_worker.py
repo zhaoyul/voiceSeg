@@ -25,6 +25,7 @@ current_callid = None
 exit_flag = False
 output = None
 call_slot = None
+current_recv_id = None
 lan_source = ""
 lan_target = ""
 
@@ -153,6 +154,8 @@ class MyCallCallback(pj.CallCallback):
         global username
         global ua_status
         global call_slot
+        global current_recv_id
+
         if self.call.info().media_state == pj.MediaState.ACTIVE:
             # Connect the call to sound device
             call_slot = self.call.info().conf_slot
@@ -161,6 +164,7 @@ class MyCallCallback(pj.CallCallback):
             self.rec_id = pj.Lib.instance().create_recorder(recv_name)
             rec_slot = pj.Lib.instance().recorder_get_slot(self.rec_id)
             pj.Lib.instance().conf_connect(call_slot, rec_slot)
+            current_recv_id = self.rec_id
 
             #play_name = "input.wav"
             #play_id = pj.Lib.instance().create_player(play_name, True)
@@ -263,6 +267,26 @@ def ua_sendmsg(text):
         ua_buddy.send_pager(msg)
     else :
         print "ua_buddy is none"
+
+def ua_newwav():
+    global lib
+    global call_slot
+    global username
+    global current_recv_id
+
+    if current_recv_id != None:
+        lib.instance().recorder_destroy(current_recv_id)
+
+    recv_name = username + ".wav"
+    Popen("rm %s"%(recv_name), shell=True)
+
+    time.sleep(0.2)
+
+    recv_id = lib.instance().create_recorder(recv_name)
+    rec_slot = lib.instance().recorder_get_slot(recv_id)
+    lib.instance().conf_connect(call_slot, rec_slot)
+
+    current_recv_id = recv_id
 
 def ua_playback(text):
     global lib
