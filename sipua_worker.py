@@ -174,7 +174,8 @@ class MyCallCallback(pj.CallCallback):
             #pj.Lib.instance().conf_connect(call_slot, 0)
             #pj.Lib.instance().conf_connect(0, call_slot)
             print "Media is now active"
-            ua_status = "Start"
+            #ua_status = "Start"
+            ua_status = "Prepare"
 
         else:
             print "Media is inactive"
@@ -254,6 +255,16 @@ def getWav(line):
     str_line =  line.rstrip('\r\n')
     decode_json = json.loads(str_line)
     return decode_json['tran_wav_file']
+
+def getPreSrc(line):
+    str_line =  line.rstrip('\r\n')
+    decode_json = json.loads(str_line)
+    return decode_json['src']
+
+def getPreWav(line):
+    str_line =  line.rstrip('\r\n')
+    decode_json = json.loads(str_line)
+    return './tts_tones/%s'%(decode_json['wav'])
 
 def ua_sendmsg(text):
     global ua_status
@@ -355,6 +366,16 @@ try:
             ua_status = "End"
             print ua_status
             break
+        elif ua_status == "Prepare":
+            infofile = "./tts_tones/%s.log"%(lan_source)
+            print "send back prepared info from %s"%infofile
+            if os.path.exists(infofile) == True:
+                h_file = open(infofile)
+                for line in h_file.readlines():
+                    #ua_sendmsg(getSrc(line))
+                    ua_playback(getPreWav(line))
+                h_file.close()
+            ua_status = "Start"
         elif ua_status == "Start":
             print "start to translate..."
             #ua_status = "test"

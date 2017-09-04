@@ -6,6 +6,29 @@ import http.client, urllib.parse, json
 from xml.etree import ElementTree
 import sys
 
+
+def lang_mapping(baidu_lang):
+   internal_lang = 'zh-CN'
+   if(baidu_lang == 'kor'):
+     internal_lang = 'ko-KR'
+   if(baidu_lang == 'jp'):
+     internal_lang = 'ja-JP'
+   if(baidu_lang == 'cn'):
+     internal_lang = 'zh-CN'
+   if(baidu_lang == 'en'):
+     internal_lang = 'en-US'
+   if(baidu_lang == 'de'):
+     internal_lang = 'de-DE'
+   if(baidu_lang == 'fr'):
+     internal_lang = 'fr-FR'
+   if(baidu_lang == 'spa'):
+     internal_lang = 'es-ES'
+   if(baidu_lang == 'ru'):
+     internal_lang = 'ru-RU'
+   if(baidu_lang == 'it'):
+     internal_lang = 'it-IT'
+   return internal_lang
+
 def getToken():
     params = ""
     headers = {"Ocp-Apim-Subscription-Key": '006f1cd905e3457a8c565c50f9147a41'}
