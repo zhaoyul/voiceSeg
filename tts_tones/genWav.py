@@ -50,3 +50,6 @@ if __name__ == '__main__':
         for num, announce in enumerate(announce_array, start=1):
             print(accesstoken, lang, announce, lang+str(num)+'.wav')
             tts.genWav(accesstoken, lang, announce, lang+str(num)+'.wav')
+    for lang, announce_array in config_dict.items():
+        writeLog(lang)
+
