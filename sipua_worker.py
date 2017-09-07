@@ -62,6 +62,10 @@ class MyAccountCallback(pj.AccountCallback):
             print self.account.info().reg_reason, self.account.info().reg_active, self.account.info().reg_expires
             #ua_status = "register fail"
 
+    def on_dtmf_digit(self, digits):
+        global username
+        print "%s: receiving dtmf [%s]"%(username, digits)
+
     def on_incoming_call(self, call):
         global current_call
         global current_callid
