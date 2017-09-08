@@ -9,8 +9,10 @@ import requests
 from subprocess import call
 from datetime import datetime
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from aip import AipSpeech
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+from aip import AipSpeech
+import logging
+
 
 from tts_tones import tts
 
@@ -32,16 +34,12 @@ def ms_reg(wav_file, lang):
             },
             files = {'file': open(wav_file, 'rb')},
         )
-        #print('Response HTTP Status Code: {status_code}'.format(
-        #    status_code=response.status_code))
-        #print('Response HTTP Response Body: {content}'.format(
-        #    content=response.content))
         if (response.ok):
             rsp_dict = response.json()
             if(rsp_dict["Duration"] > 0):
                 return rsp_dict["DisplayText"]
             else:
-                print ("ms 解析:(%s)没有结果, 退出!" %(wav_file))
+                log.debug('%s 微软识别没结果，exit', wav_file)
                 sys.exit(0)
 
     except requests.exceptions.RequestException:
@@ -69,14 +67,14 @@ def baidu_rec(current_wav_file, lang):
     try:
         first_result =  result_dict["result"][0]#.decode("UTF-8")
     except Exception as e:
-        print ("baidu 解析:(%s)没有结果, 退出!" %(current_wav_file))
+        log.debug('%s 百度识别没有结果，exit', current_wav_file)
         sys.exit(0)
-    print (first_result)
+    log.debug('%s 百度识别结果是:%s', current_wav_file, first_result)
     return first_result
 
 def speech_synthesis(text, lang, output_file_name):
     if(lang == 'en' or lang == 'ch'):
-        print('百度tts开始:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 百度tts开始', wav_file)
         aipSpeech = getBaiduAipSpeech()
         text2WavResult  = aipSpeech.synthesis(text, 'zh', 1, {
             'vol': 1,
@@ -88,19 +86,34 @@ def speech_synthesis(text, lang, output_file_name):
             with open(mp3_file, 'wb') as f:
                 f.write(text2WavResult)
             call(["ffmpeg",'-loglevel', '-8',"-i", mp3_file, output_file_name] )
-            print('百度tts结束:' + wav_file + 'time:' + str(datetime.now()))
+            log.debug('%s 百度tts结束', wav_file)
         else:
            print (text2WavResult)
     else:
         internal_lang = tts.lang_mapping(lang)
 
-        print('微软tts开始:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 微软tts开始', wav_file)
         #call(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name] )
         auth_code = tts.getToken()
         tts.genWav(auth_code, internal_lang, text, output_file_name)
-        print('微软tts结束:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 微软tts结束', wav_file)
+
+def getAppLogger():
+    logging.basicConfig(
+        stream=sys.stdout,
+        level=logging.DEBUG,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    )
+    logging.getLogger('requests').setLevel(logging.ERROR)
+    logging.getLogger("urllib3").setLevel(logging.ERROR)
+    log = logging.getLogger(__name__)
+    return log
+
 
 if __name__ == '__main__':
+
+    log = getAppLogger()
+
     wav_file=''
     tran_wav_file=''
 
@@ -108,24 +121,24 @@ if __name__ == '__main__':
     toLang = 'en'
 
     if len(sys.argv) <= 3:
-        print ("必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言")
+        log.error('必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言')
         sys.exit(1)
     else:
         wav_file = sys.argv[1].strip('\r');
         tran_wav_file = wav_file.replace('.wav', '_tran.wav')
         fromLang = sys.argv[2]
         toLang = sys.argv[3]
-        print('开始处理切片文件:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 开始切片', wav_file)
 
     q = None
     if(fromLang == 'en' or fromLang == 'zh'):
-        print('百度识别开始:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 百度识别开始', wav_file)
         q = baidu_rec(wav_file, fromLang)
-        print('百度识别结束:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 百度识别结束', wav_file)
     else:
-        print('微软识别开始:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 微软识别开始', wav_file)
         q = ms_reg(wav_file, fromLang)
-        print('微软识别开始:' + wav_file + 'time:' + str(datetime.now()))
+        log.debug('%s 微软识别结束', wav_file)
     salt = random.randint(32768, 65536)
 
     appid = '20170721000065533'
@@ -147,16 +160,16 @@ if __name__ == '__main__':
     dst=''
     trans_result=''
     try:
+        log.debug('%s 百度翻译开始', wav_file)
         response  = requests.get('https://fanyi-api.baidu.com/api/trans/vip/translate',payload)
-        print (response.content)
         if response.status_code == 200:
             src = response.json()["trans_result"][0]["src"]
             dst = response.json()["trans_result"][0]["dst"]
             trans_result = response.json()["trans_result"][0]
             speech_synthesis(dst, toLang, tran_wav_file)
-            print('百度翻译:' + wav_file + 'time:' + str(datetime.now()))
+            log.debug('%s 百度翻译结束', wav_file)
     except Exception as e:
-        print (e)
+        log.error('百度翻译一场:%s', e)
 
 
     call_translate = re.split("_", wav_file)[0] + "_result.log"
