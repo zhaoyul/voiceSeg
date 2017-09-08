@@ -38,7 +38,7 @@ def getToken():
     path = "/sts/v1.0/issueToken"
 
     # Connect to server to get the Access Token
-    print ("Connect to server to get the Access Token")
+    print ("Connect to ms server to get the Access Token")
     conn = http.client.HTTPSConnection(AccessTokenHost)
     conn.request("POST", path, params, headers)
     response = conn.getresponse()

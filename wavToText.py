@@ -6,27 +6,7 @@ from datetime import datetime
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def lang_mapping(baidu_lang):
-   internal_lang = 'zh-CN'
-   if(baidu_lang == 'kor'):
-     internal_lang = 'ko-KR'
-   if(baidu_lang == 'jp'):
-     internal_lang = 'ja-JP'
-   if(baidu_lang == 'cn'):
-     internal_lang = 'zh-CN'
-   if(baidu_lang == 'en'):
-     internal_lang = 'en-US'
-   if(baidu_lang == 'de'):
-     internal_lang = 'de-DE'
-   if(baidu_lang == 'fr'):
-     internal_lang = 'fr-FR'
-   if(baidu_lang == 'spa'):
-     internal_lang = 'es-ES'
-   if(baidu_lang == 'ru'):
-     internal_lang = 'ru-RU'
-   if(baidu_lang == 'it'):
-     internal_lang = 'it-IT'
-   return internal_lang
+from tts_tones import tts
 
 wav_file=''
 tran_wav_file=''
@@ -48,34 +28,12 @@ else:
   #call(["mv", "bigger"+wav_file, wav_file])
 
 ################################
-def getToken():
-    # Request
-    # POST https://api.cognitive.microsoft.com/sts/v1.0/issueToken
-
-    try:
-        response = requests.post(
-            url="https://api.cognitive.microsoft.com/sts/v1.0/issueToken",
-            headers={
-                "Ocp-Apim-Subscription-Key": "006f1cd905e3457a8c565c50f9147a41",
-                "Content-type": "application/x-www-form-urlencoded",
-            },
-            data={
-            },
-        )
-#         print('Response HTTP Status Code: {status_code}'.format(
-#             status_code=response.status_code))
-#         print('Response HTTP Response Body: {content}'.format(
-#             content=response.content))
-        return response.content
-    except requests.exceptions.RequestException:
-        print('HTTP Request failed')
-
 
 
 
 def ms_reg(wav_file, lang):
-    internal_lang = lang_mapping(lang)
-    auth_code = getToken()
+    internal_lang = tts.lang_mapping(lang)
+    auth_code = tts.getToken()
     try:
         response = requests.post(
             url="https://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1",
@@ -94,7 +52,7 @@ def ms_reg(wav_file, lang):
         #print('Response HTTP Status Code: {status_code}'.format(
         #    status_code=response.status_code))
         #print('Response HTTP Response Body: {content}'.format(
-            content=response.content))
+        #    content=response.content))
         if (response.ok):
             rsp_dict = response.json()
             if(rsp_dict["Duration"] > 0):
@@ -170,10 +128,12 @@ def speech_synthesis(text, lang, output_file_name):
         else:
            print (text2WavResult)
     else:
-        internal_lang = lang_mapping(lang)
+        internal_lang = tts.lang_mapping(lang)
 
         print('微软tts开始:' + wav_file + 'time:' + str(datetime.now()))
-        call(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name] )
+        #call(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name] )
+        auth_code = tts.getToken()
+        tts.genWav(auth_code, internal_lang, text, output_file_name)
         print('微软tts结束:' + wav_file + 'time:' + str(datetime.now()))
 
 
