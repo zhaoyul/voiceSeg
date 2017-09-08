@@ -3,9 +3,7 @@ import sys
 import requests
 from subprocess import call
 from datetime import datetime
-
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def lang_mapping(baidu_lang):
@@ -49,7 +47,6 @@ else:
   #call(["ffmpeg","-loglevel","16", "-i", wav_file, "-af", "volume=5", "bigger"+wav_file] )
   #call(["mv", "bigger"+wav_file, wav_file])
 
-import requests
 ################################
 def getToken():
     # Request
@@ -74,19 +71,11 @@ def getToken():
         print('HTTP Request failed')
 
 
-# 	ko-KR	Korean (Korea)
-#       ja-JP	Japanese (Japan)
-#       zh-CN	Chinese (Mandarin, simplified)
-#       en-US	English (United States)
 
 
 def ms_reg(wav_file, lang):
-
     internal_lang = lang_mapping(lang)
-
-
     auth_code = getToken()
-
     try:
         response = requests.post(
             url="https://speech.platform.bing.com/speech/recognition/interactive/cognitiveservices/v1",
@@ -102,9 +91,9 @@ def ms_reg(wav_file, lang):
             },
             files = {'file': open(wav_file, 'rb')},
         )
-        print('Response HTTP Status Code: {status_code}'.format(
-            status_code=response.status_code))
-        print('Response HTTP Response Body: {content}'.format(
+        #print('Response HTTP Status Code: {status_code}'.format(
+        #    status_code=response.status_code))
+        #print('Response HTTP Response Body: {content}'.format(
             content=response.content))
         if (response.ok):
             rsp_dict = response.json()
@@ -223,10 +212,6 @@ try:
         dst = response.json()["trans_result"][0]["dst"]
         trans_result = response.json()["trans_result"][0]
         speech_synthesis(dst, toLang, tran_wav_file)
-        #call(["pico2wave","--wave="+tran_wav_file, dst] )
-        #call(["ffmpeg","-loglevel","16", "-i", tran_wav_file, "-af", "volume=5", "bigger"+tran_wav_file] )
-        #call(["mv", "bigger"+tran_wav_file, tran_wav_file])
-        #print (src)
         print('百度翻译:' + wav_file + 'time:' + str(datetime.now()))
 except Exception as e:
     print (e)
@@ -237,7 +222,6 @@ call_translate = re.split("_", wav_file)[0] + "_result.log"
 file_object = open(call_translate, "a")
 import json
 try:
-   #file_object.writelines([src,' ',dst] )
    trans_result["tran_wav_file"] = tran_wav_file
    file_object.writelines([json.dumps(trans_result),'\n'] )
 finally:
