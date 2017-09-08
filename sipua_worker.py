@@ -3,6 +3,7 @@ import pjsua as pj
 import re
 from subprocess import Popen, PIPE, call
 import time
+from datetime import datetime
 import os
 import json
 import signal
@@ -307,6 +308,7 @@ def ua_playback(text):
     global lib
     global call_slot
     media_file = text.encode('utf-8')
+
     if os.path.exists(media_file) == True:
         wfile = wave.open(media_file)
         wtime = (1.0 * wfile.getnframes()) / wfile.getframerate()
@@ -314,6 +316,9 @@ def ua_playback(text):
         wfile.close()
         #avoid too short wav
         if wtime > 0.2:
+            #timestr = time.strftime('%Y-%m-%d-%H-%M-%S', time.localtime(time.time()))
+            timestr = str(datetime.now())
+            print "play back %s now [%s]"%(media_file,timestr)
             wav_player_id=lib.instance().create_player(media_file, False)
             wav_slot=lib.instance().player_get_slot(wav_player_id)
             lib.instance().conf_connect(wav_slot, call_slot)

@@ -2,6 +2,7 @@
 import sys
 import requests
 from subprocess import call
+from datetime import datetime
 
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
@@ -43,6 +44,7 @@ else:
   tran_wav_file = wav_file.replace('.wav', '_tran.wav')
   fromLang = sys.argv[2]
   toLang = sys.argv[3]
+  print('开始处理切片文件:' + wav_file + 'time:' + str(datetime.now()))
   # use ffmpeg to boost the volume
   #call(["ffmpeg","-loglevel","16", "-i", wav_file, "-af", "volume=5", "bigger"+wav_file] )
   #call(["mv", "bigger"+wav_file, wav_file])
@@ -109,7 +111,7 @@ def ms_reg(wav_file, lang):
             if(rsp_dict["Duration"] > 0):
                 return rsp_dict["DisplayText"]
             else:
-                print ("ms 解析:(%s)没有结果, 退出!" %(current_wav_file))
+                print ("ms 解析:(%s)没有结果, 退出!" %(wav_file))
                 sys.exit(0)
 
     except requests.exceptions.RequestException:
@@ -162,6 +164,7 @@ secretKey = 'xfI4YwH9Hh8jhobg1qjV'
 
 def speech_synthesis(text, lang, output_file_name):
     if(lang == 'en' or lang == 'ch'):
+        print('百度tts开始:' + wav_file + 'time:' + str(datetime.now()))
         #print("------------")
         #print(text + " " + lang + " " + output_file_name)
         text2WavResult  = aipSpeech.synthesis(text, 'zh', 1, {
@@ -173,21 +176,27 @@ def speech_synthesis(text, lang, output_file_name):
         if not isinstance(text2WavResult, dict):
             with open(mp3_file, 'wb') as f:
                 f.write(text2WavResult)
-            call(["ffmpeg","-i", mp3_file, output_file_name] )
+            call(["ffmpeg",'-loglevel', '-8',"-i", mp3_file, output_file_name] )
+            print('百度tts结束:' + wav_file + 'time:' + str(datetime.now()))
         else:
            print (text2WavResult)
     else:
         internal_lang = lang_mapping(lang)
 
-        print(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name])
+        print('微软tts开始:' + wav_file + 'time:' + str(datetime.now()))
         call(["java","-jar", "TTSSample.jar", text, internal_lang,  output_file_name] )
+        print('微软tts结束:' + wav_file + 'time:' + str(datetime.now()))
 
 
 q = None
 if(fromLang == 'en' or fromLang == 'zh'):
+    print('百度识别开始:' + wav_file + 'time:' + str(datetime.now()))
     q = baidu_rec(wav_file, fromLang)
+    print('百度识别结束:' + wav_file + 'time:' + str(datetime.now()))
 else:
+    print('微软识别开始:' + wav_file + 'time:' + str(datetime.now()))
     q = ms_reg(wav_file, fromLang)
+    print('微软识别开始:' + wav_file + 'time:' + str(datetime.now()))
 salt = random.randint(32768, 65536)
 
 sign = (appid+q+str(salt)+secretKey).encode('utf-8')
@@ -218,6 +227,7 @@ try:
         #call(["ffmpeg","-loglevel","16", "-i", tran_wav_file, "-af", "volume=5", "bigger"+tran_wav_file] )
         #call(["mv", "bigger"+tran_wav_file, tran_wav_file])
         #print (src)
+        print('百度翻译:' + wav_file + 'time:' + str(datetime.now()))
 except Exception as e:
     print (e)
 

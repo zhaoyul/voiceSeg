@@ -1,6 +1,6 @@
 #!/bin/bash
 # takes one and only argurments: the CALL_ID (CALL_ID.wav)
-set -x
+#set -x
 if [ -z "$1" ]
   then
     echo "call_id must be supplied"
@@ -35,4 +35,5 @@ if [ ! -f $WAV_FILE ]
     exit 1
 fi
 python bin_tail.py $WAV_FILE | auditok -m 50 -s 0.3 -e 30 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &
+#$(tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | xargs -I {} echo 'find voice at ' `date` for voice {})
 tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | unbuffer -p grep -v tran | xargs -I {} python3 wavToText.py {} $FROM_LANG $TO_LANG
