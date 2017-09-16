@@ -166,8 +166,8 @@ if __name__ == '__main__':
             src = response.json()["trans_result"][0]["src"]
             dst = response.json()["trans_result"][0]["dst"]
             trans_result = response.json()["trans_result"][0]
-            speech_synthesis(dst, toLang, tran_wav_file)
             log.debug('%s 百度翻译结束', wav_file)
+            speech_synthesis(dst, toLang, tran_wav_file)
     except Exception as e:
         log.error('百度翻译一场:%s', e)
 
