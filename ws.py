@@ -15,11 +15,7 @@ import sys
 import time
 from datetime import datetime
 from subprocess import Popen
-try:
-    import simplejson as json
-except ImportError:
-    import json
-import shutil
+import signal
 
 def init_wave(call_id):
     if call_id:
@@ -28,9 +24,6 @@ def init_wave(call_id):
         bit_width = 16
         chanels = 1
         wave_file.setparams((chanels, bit_width//8, sample_rate, 0, 'NONE', 'not compressed'))
-        lan_source = 'zh'
-        lan_target = 'en'
-        self.sclice_process = Popen("./sclice.sh %s %s %s"%(call_id+'.wav', lan_source, lan_target), shell=True, preexec_fn=os.setsid)
         return wave_file
     else:
         return None
@@ -57,6 +50,11 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
         elif message.startswith("start"):
             self.call_id = self.parse_msg(message)
             self.out_wave_file = init_wave(self.call_id)
+            lan_source = 'zh'
+            lan_target = 'en'
+            print("before:")
+            self.sclice_process = Popen("./sclice.sh %s %s %s"%(self.call_id, lan_source, lan_target), shell=True, preexec_fn=os.setsid)
+            print ("after:")
             print ("now start call:", self.call_id)
         elif message.startswith("stop"):
             print ("now close call:", self.call_id)
