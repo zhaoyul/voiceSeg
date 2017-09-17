@@ -17,6 +17,8 @@ from datetime import datetime
 from subprocess import Popen
 import signal
 
+sockets_dict = {}
+
 def init_wave(call_id):
     if call_id:
         wave_file = wave.open(call_id+'.wav', 'wb')
@@ -27,8 +29,6 @@ def init_wave(call_id):
         return wave_file
     else:
         return None
-
-
 
 class RealtimeHandler(tornado.websocket.WebSocketHandler):
 
@@ -41,6 +41,8 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print ("open")
+    def on_close(self):
+        print ("close")
 
 
     def on_message(self, message):
@@ -52,16 +54,31 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
             self.out_wave_file = init_wave(self.call_id)
             lan_source = 'zh'
             lan_target = 'en'
-            print("before:")
             self.sclice_process = Popen("./sclice.sh %s %s %s"%(self.call_id, lan_source, lan_target), shell=True, preexec_fn=os.setsid)
-            print ("after:")
             print ("now start call:", self.call_id)
+            sockets_dict[self.call_id] = self
         elif message.startswith("stop"):
             print ("now close call:", self.call_id)
             self.out_wave_file.close()
             if self.sclice_process:
                 os.killpg(os.getpgid(self.sclice_process.pid), signal.SIGKILL)
-        else :
+        elif message.startswith("kevin"):
+            print("recv local msg:", message)
+            _, call_id, sub_type, msg = message.split("|")
+            if call_id in sockets_dict:
+                sender = sockets_dict[call_id]
+                if sub_type == "asr":
+                    sender.write_message(msg)
+                elif sub_type == "tran" :
+                    sender.write_message(msg)
+                elif sub_type == "tts":
+                    try:
+                        with open(msg, 'rb') as f:
+                            data = f.read()
+                            sender.write_message(data, binary=True)
+                    except Exception as e:
+                        pass
+        else:
             pass
 
     def process_wave(self, message):
@@ -77,6 +94,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
         #    print("------------:", i)
         #    self.out_wave_file.writeframes(value)
         #    #print(value)
+
 
 
 settings = {

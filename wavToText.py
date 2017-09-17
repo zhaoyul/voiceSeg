@@ -6,6 +6,7 @@ import urllib
 import random
 import hashlib
 import requests
+from websocket import create_connection
 from subprocess import call
 from datetime import datetime
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
@@ -109,6 +110,17 @@ def getAppLogger():
     log = logging.getLogger(__name__)
     return log
 
+def getWs():
+    ws = None
+    try:
+        ws = create_connection("ws://localhost:5000//websocket")
+    except Exception as e:
+        pass
+    return ws
+
+def send_ws_msg(ws,call_id, msg_type, msg):
+    if not ws is None and ws.connected:
+        ws.send('{0}|{1}|{2}|{3}'.format('kevin', call_id, msg_type, msg))
 
 if __name__ == '__main__':
 
@@ -120,6 +132,7 @@ if __name__ == '__main__':
     fromLang = 'zh'
     toLang = 'en'
 
+
     if len(sys.argv) <= 3:
         log.error('必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言')
         sys.exit(1)
@@ -130,6 +143,8 @@ if __name__ == '__main__':
         toLang = sys.argv[3]
         log.debug('%s 开始切片', wav_file)
 
+    call_id = wav_file.split('_')[0]
+
     q = None
     if(fromLang == 'en' or fromLang == 'zh'):
         log.debug('%s 百度识别开始', wav_file)
@@ -139,6 +154,12 @@ if __name__ == '__main__':
         log.debug('%s 微软识别开始', wav_file)
         q = ms_reg(wav_file, fromLang)
         log.debug('%s 微软识别结束', wav_file)
+
+    ws = getWs()
+    # send out the asr result
+    send_ws_msg(ws, call_id, 'asr', q)
+
+
     salt = random.randint(32768, 65536)
 
     appid = '20170721000065533'
@@ -165,9 +186,14 @@ if __name__ == '__main__':
         if response.status_code == 200:
             src = response.json()["trans_result"][0]["src"]
             dst = response.json()["trans_result"][0]["dst"]
+            log.debug('%s baidu result:', dst)
+            # send out the asr result
+            send_ws_msg(ws, call_id, 'tran', dst)
             trans_result = response.json()["trans_result"][0]
             log.debug('%s 百度翻译结束', wav_file)
             speech_synthesis(dst, toLang, tran_wav_file)
+            # send out the tts file name
+            send_ws_msg(ws, call_id, 'tts', tran_wav_file)
     except Exception as e:
         log.error('百度翻译一场:%s', e)
 
@@ -179,3 +205,5 @@ if __name__ == '__main__':
        file_object.writelines([json.dumps(trans_result),'\n'] )
     finally:
        file_object.close( )
+
+    ws.close()
