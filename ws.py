@@ -44,6 +44,11 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
     def on_close(self):
         print ("close")
 
+    def get_sclice_process(self, call_id, lan_source, lan_target):
+        if self.sclice_process:
+            pass
+        else:
+            self.sclice_process =  Popen("./sclice.sh %s %s %s %s"%(call_id, lan_source, lan_target, 8000), shell=True, preexec_fn=os.setsid)
 
     def on_message(self, message):
 
@@ -54,7 +59,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
             self.out_wave_file = init_wave(self.call_id)
             lan_source = 'zh'
             lan_target = 'en'
-            self.sclice_process = Popen("./sclice.sh %s %s %s %s"%(self.call_id, lan_source, lan_target, 8000), shell=True, preexec_fn=os.setsid)
+            self.get_sclice_process(self.call_id, lan_source, lan_target)
             print ("now start call:", self.call_id)
             sockets_dict[self.call_id] = self
         elif message.startswith("stop"):
@@ -76,6 +81,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
                         with open(msg, 'rb') as f:
                             data = f.read()
                             sender.write_message(data, binary=True)
+                            print('send binary file:'+msg)
                     except Exception as e:
                         pass
         else:

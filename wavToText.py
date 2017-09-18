@@ -102,7 +102,7 @@ def speech_synthesis(text, lang, output_file_name):
 def getAppLogger():
     logging.basicConfig(
         stream=sys.stdout,
-        level=logging.DEBUG,
+        level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     )
     logging.getLogger('requests').setLevel(logging.ERROR)
@@ -198,7 +198,7 @@ if __name__ == '__main__':
             log.debug('%s 百度翻译结束', wav_file)
             speech_synthesis(dst, toLang, tran_wav_file)
             # send out the tts file name
-            send_ws_msg(ws, call_id, 'tts', tran_wav_file)
+            #send_ws_msg(ws, call_id, 'tts', tran_wav_file)
     except Exception as e:
         log.error('百度翻译一场:%s', e)
 
