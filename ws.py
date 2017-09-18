@@ -33,7 +33,7 @@ def init_wave(call_id):
 class RealtimeHandler(tornado.websocket.WebSocketHandler):
 
     def parse_msg(self, msg):
-        call_id = msg.replace("start ", "")
+        call_id = msg.split(' ')[1]
         return call_id
 
     def check_origin(self, origin):
@@ -54,7 +54,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
             self.out_wave_file = init_wave(self.call_id)
             lan_source = 'zh'
             lan_target = 'en'
-            self.sclice_process = Popen("./sclice.sh %s %s %s"%(self.call_id, lan_source, lan_target), shell=True, preexec_fn=os.setsid)
+            self.sclice_process = Popen("./sclice.sh %s %s %s %s"%(self.call_id, lan_source, lan_target, 8000), shell=True, preexec_fn=os.setsid)
             print ("now start call:", self.call_id)
             sockets_dict[self.call_id] = self
         elif message.startswith("stop"):

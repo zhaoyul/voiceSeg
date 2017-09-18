@@ -17,7 +17,7 @@ import logging
 
 from tts_tones import tts
 
-def ms_reg(wav_file, lang):
+def ms_reg(wav_file, lang, rate):
     internal_lang = tts.lang_mapping(lang)
     auth_code = tts.getToken()
     try:
@@ -31,7 +31,7 @@ def ms_reg(wav_file, lang):
             },
             headers={
                 "Authorization": auth_code,
-                "Content-type": "audio/wav; codec=\"audio/pcm\"; samplerate=16000",
+                "Content-type": "audio/wav; codec=\"audio/pcm\"; samplerate=" + rate,
             },
             files = {'file': open(wav_file, 'rb')},
         )
@@ -56,10 +56,10 @@ def get_file_content(filePath):
     with open(filePath, 'rb') as fp:
         return fp.read()
 
-def baidu_rec(current_wav_file, lang):
+def baidu_rec(current_wav_file, lang, rate):
     # TODO: should parameterize the languages.
     aipSpeech = getBaiduAipSpeech()
-    result_dict = aipSpeech.asr(get_file_content(current_wav_file), 'wav', 16000, {
+    result_dict = aipSpeech.asr(get_file_content(current_wav_file), 'wav', int(rate), {
         'lan': lang,
     })
     #if result_dict is None or len(result_dict["result"]) == 0:
@@ -131,16 +131,18 @@ if __name__ == '__main__':
 
     fromLang = 'zh'
     toLang = 'en'
+    rate='16000'
 
 
-    if len(sys.argv) <= 3:
-        log.error('必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言')
+    if len(sys.argv) <= 4:
+        log.error('必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言 4. 采样频率')
         sys.exit(1)
     else:
         wav_file = sys.argv[1].strip('\r');
         tran_wav_file = wav_file.replace('.wav', '_tran.wav')
         fromLang = sys.argv[2]
         toLang = sys.argv[3]
+        rate = sys.argv[4]
         log.debug('%s 开始切片', wav_file)
 
     call_id = wav_file.split('_')[0]
@@ -148,11 +150,11 @@ if __name__ == '__main__':
     q = None
     if(fromLang == 'en' or fromLang == 'zh'):
         log.debug('%s 百度识别开始', wav_file)
-        q = baidu_rec(wav_file, fromLang)
+        q = baidu_rec(wav_file, fromLang, rate)
         log.debug('%s 百度识别结束', wav_file)
     else:
         log.debug('%s 微软识别开始', wav_file)
-        q = ms_reg(wav_file, fromLang)
+        q = ms_reg(wav_file, fromLang, rate)
         log.debug('%s 微软识别结束', wav_file)
 
     ws = getWs()
