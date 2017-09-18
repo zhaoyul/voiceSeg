@@ -45,7 +45,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
         print ("close")
 
     def get_sclice_process(self, call_id, lan_source, lan_target):
-        if self.sclice_process:
+        if  hasattr(self, 'sclice_process') and not self.sclice_process is None :
             pass
         else:
             self.sclice_process =  Popen("./sclice.sh %s %s %s %s"%(call_id, lan_source, lan_target, 8000), shell=True, preexec_fn=os.setsid)
@@ -67,15 +67,16 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
             self.out_wave_file.close()
             if self.sclice_process:
                 os.killpg(os.getpgid(self.sclice_process.pid), signal.SIGKILL)
+                self.sclice_process = None
         elif message.startswith("kevin"):
             print("recv local msg:", message)
             _, call_id, sub_type, msg = message.split("|")
             if call_id in sockets_dict:
                 sender = sockets_dict[call_id]
                 if sub_type == "asr":
-                    sender.write_message(msg)
+                    sender.write_message("{'asr':'" + msg + "'}")
                 elif sub_type == "tran" :
-                    sender.write_message(msg)
+                    sender.write_message("{'tran':'" + msg + "'}")
                 elif sub_type == "tts":
                     try:
                         with open(msg, 'rb') as f:
