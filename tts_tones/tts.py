@@ -75,6 +75,8 @@ def genWav(accesstoken, lang, text, file_name):
         voice.set('name', 'Microsoft Server Speech Text to Speech Voice (es-ES, HelenaRUS)')
     if lang == 'ru-RU':
         voice.set('name', 'Microsoft Server Speech Text to Speech Voice (ru-RU, Irina, Apollo)')
+    if lang == 'it-IT':
+        voice.set('name', 'Microsoft Server Speech Text to Speech Voice (it-IT, Cosimo, Apollo)')
     voice.text = text
     #voice.text = 'This is a demo to call microsoft text to speech service in Python.'
 
