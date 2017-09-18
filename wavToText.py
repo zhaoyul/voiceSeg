@@ -112,6 +112,9 @@ def getAppLogger():
 
 def getWs():
     ws = None
+    if rate == '16000':
+        return ws
+
     try:
         ws = create_connection("ws://localhost:5000//websocket")
     except Exception as e:
@@ -208,4 +211,5 @@ if __name__ == '__main__':
     finally:
        file_object.close( )
 
-    ws.close()
+    if ws:
+        ws.close()
