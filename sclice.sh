@@ -53,6 +53,6 @@ then
     MAX_TIME=5
 fi
 
-python bin_tail.py $WAV_FILE | auditok -r $RATE -m MAX_TIME -s 0.3 -e 50 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &
+python bin_tail.py $WAV_FILE | auditok -r $RATE -m $MAX_TIME -s 0.3 -e 50 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &
 
 tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | unbuffer -p grep -v tran | xargs -I {} python3 wavToText.py {} $FROM_LANG $TO_LANG $RATE

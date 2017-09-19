@@ -193,7 +193,7 @@ if __name__ == '__main__':
             dst = response.json()["trans_result"][0]["dst"]
             log.debug('%s baidu result:', dst)
             # send out the asr result
-            send_ws_msg(ws, call_id, 'tran', dst)
+            #send_ws_msg(ws, call_id, 'tran', dst)
             trans_result = response.json()["trans_result"][0]
             log.debug('%s 百度翻译结束', wav_file)
             speech_synthesis(dst, toLang, tran_wav_file)
