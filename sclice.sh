@@ -50,7 +50,7 @@ then
     MAX_TIME=50
     else
     RATE=8000
-    MAX_TIME=5
+    MAX_TIME=3
 fi
 
 python bin_tail.py $WAV_FILE | auditok -r $RATE -m $MAX_TIME -s 0.3 -e 50 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &

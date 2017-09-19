@@ -141,6 +141,7 @@ if __name__ == '__main__':
         log.error('必须指定1.要处理的已经切片好的wav文件名称  2.输入语言 3.输出语言 4. 采样频率')
         sys.exit(1)
     else:
+        print(sys.argv)
         wav_file = sys.argv[1].strip('\r');
         tran_wav_file = wav_file.replace('.wav', '_tran.wav')
         fromLang = sys.argv[2]
@@ -152,7 +153,7 @@ if __name__ == '__main__':
 
     q = None
     if(fromLang == 'en' or fromLang == 'zh'):
-        log.debug('%s 百度识别开始', wav_file)
+        log.debug('%s 百度识别开始:%s', wav_file, fromLang)
         q = baidu_rec(wav_file, fromLang, rate)
         log.debug('%s 百度识别结束', wav_file)
     else:
