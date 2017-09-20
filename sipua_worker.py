@@ -396,7 +396,7 @@ try:
                 h_file.truncate()
                 h_file.close()
 
-            output = Popen("./sclice.sh %s %s %s %s"%(username, lan_source, lan_target, 1), shell=True, preexec_fn=os.setsid)
+            output = Popen("./sclice.sh %s %s %s %s"%(username, lan_source, lan_target,'1'), shell=True, preexec_fn=os.setsid)
             ua_status = "Translate"
         elif ua_status == "Translate":
             binfile = "%s_result.log"%(username)
