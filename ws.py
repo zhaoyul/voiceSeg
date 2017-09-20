@@ -48,7 +48,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
         if  hasattr(self, 'sclice_process') and not self.sclice_process is None :
             pass
         else:
-            self.sclice_process =  Popen("./sclice.sh %s %s %s %s"%(call_id, lan_source, lan_target, 8000), shell=True, preexec_fn=os.setsid)
+            self.sclice_process =  Popen("./sclice.sh %s %s %s %s"%(call_id, lan_source, lan_target, 2), shell=True, preexec_fn=os.setsid)
 
     def clean_resource(self):
         if self.call_id in sockets_dict:
