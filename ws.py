@@ -41,11 +41,14 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
 
     def open(self):
         print ("open")
+        self.call_id = None
+        self.sclice_process = None
+        self.out_wave_file = None
     def on_close(self):
         print ("close")
 
     def get_sclice_process(self, call_id, lan_source, lan_target):
-        if  hasattr(self, 'sclice_process') and not self.sclice_process is None :
+        if not self.sclice_process is None :
             pass
         else:
             self.sclice_process =  Popen("./sclice.sh %s %s %s %s"%(call_id, lan_source, lan_target, '2'), shell=True, preexec_fn=os.setsid)
@@ -100,7 +103,7 @@ class RealtimeHandler(tornado.websocket.WebSocketHandler):
 
     def process_wave(self, message):
         #print(message)
-        if not hasattr(self, 'out_wave_file'):
+        if self.out_wave_file is None:
             self.out_wave_file = init_wave('xxxxxx')
 
         self.out_wave_file.writeframes(message)
