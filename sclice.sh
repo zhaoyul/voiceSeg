@@ -59,9 +59,10 @@ tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | unbuffer -p grep -v tra
 
 reconfig ()
 {
-    FROM_LANG=$(cat $CALL_ID.config | grep 'from_lang'| sed 's/from_lang://g')
-    TO_LANG=$(cat $CALL_ID.config | grep 'to_lang'| sed 's/to_lang://g')
-    echo 'change language input:' $FROM_LANG  ' output:' $TO_LANG
+    TEMP=$FROM_LANG
+    FROM_LANG=$TO_LANG
+    TO_LANG=$TEMP
+    echo 'exchange language input:' $FROM_LANG  ' output:' $TO_LANG
 }
 
 trap "  reconfig " SIGTERM
