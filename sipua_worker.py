@@ -29,6 +29,7 @@ call_slot = None
 current_recv_id = None
 lan_source = ""
 lan_target = ""
+lan_cur = ""
 
 # Logging callback
 def log_cb(level, str, len):
@@ -65,7 +66,17 @@ class MyAccountCallback(pj.AccountCallback):
 
     def on_dtmf_digit(self, digits):
         global username
+        global lan_source
+        global lan_target
+        global lan_cur
+        global output
+        global ua_status
         print "%s: receiving dtmf [%s]"%(username, digits)
+        lan_cur = lan_target
+        if output:
+            os.killpg(os.getpgid(output.pid), signal.SIGKILL)
+            print "kill sclice [", output.pid, "]"
+        ua_status = "Switch"
 
     def on_incoming_call(self, call):
         global current_call
@@ -380,10 +391,21 @@ try:
             print "send back prepared info from %s"%infofile
             if os.path.exists(infofile) == True:
                 h_file = open(infofile)
-                for line in h_file.readlines():
+                ua_playback(h_file.readlines()[0])
+                #for line in h_file.readlines():
                     #ua_sendmsg(getSrc(line))
-                    ua_playback(getPreWav(line))
+                #    ua_playback(getPreWav(line))
                 h_file.close()
+            ua_status = "Start"
+        elif ua_status == "Switch":
+            switchfile = "./tts_tones/%s.log"%(lan_cur)
+            print "send back switch info from %s"%switchfile
+            if os.path.exists(switchfile) == True:
+                s_file = open(switchfile)
+                ua_playback(s_file.readlines()[1])
+                s_file.close()
+            lan_target = lan_source
+            lan_source = lan_cur
             ua_status = "Start"
         elif ua_status == "Start":
             print "start to translate..."
