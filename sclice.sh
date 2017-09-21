@@ -56,3 +56,12 @@ fi
 python bin_tail.py $WAV_FILE | auditok -r $RATE -m $MAX_TIME -s 0.3 -e 30 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &
 
 tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | unbuffer -p grep -v tran | xargs -I {} python3 wavToText.py {} $FROM_LANG $TO_LANG $RATE
+
+reconfig ()
+{
+    FROM_LANG=$(cat $CALL_ID.config | grep 'from_lang'| sed 's/from_lang://g')
+    TO_LANG=$(cat $CALL_ID.config | grep 'to_lang'| sed 's/to_lang://g')
+    echo 'change language input:' $FROM_LANG  ' output:' $TO_LANG
+}
+
+trap "  reconfig " SIGTERM
