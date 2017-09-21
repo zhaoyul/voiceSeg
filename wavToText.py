@@ -102,7 +102,7 @@ def speech_synthesis(text, lang, output_file_name):
 def getAppLogger():
     logging.basicConfig(
         stream=sys.stdout,
-        level=logging.INFO,
+        level=logging.DEBUG,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     )
     logging.getLogger('requests').setLevel(logging.ERROR)

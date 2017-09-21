@@ -1,6 +1,6 @@
 #!/bin/bash
 # takes one and only argurments: the CALL_ID (CALL_ID.wav)
-set -x
+#set -x
 if [ -z "$1" ]
   then
     echo "call_id must be supplied"
