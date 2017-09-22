@@ -64,20 +64,6 @@ class MyAccountCallback(pj.AccountCallback):
             print self.account.info().reg_reason, self.account.info().reg_active, self.account.info().reg_expires
             #ua_status = "register fail"
 
-    def on_dtmf_digit(self, digits):
-        global username
-        global lan_source
-        global lan_target
-        global lan_cur
-        global output
-        global ua_status
-        print "%s: receiving dtmf [%s]"%(username, digits)
-        lan_cur = lan_target
-        if output:
-            os.killpg(os.getpgid(output.pid), signal.SIGKILL)
-            print "kill sclice [", output.pid, "]"
-        ua_status = "Switch"
-
     def on_incoming_call(self, call):
         global current_call
         global current_callid
@@ -134,6 +120,38 @@ class MyCallCallback(pj.CallCallback):
 
     def __init__(self, call=None):
         pj.CallCallback.__init__(self, call)
+
+    def on_dtmf_digit(self, digits):
+        global username
+        global lan_source
+        global lan_target
+        global lan_cur
+        global output
+        global ua_status
+        global call_slot
+        global current_recv_id
+        print "MyCall %s: receiving dtmf [%s]"%(username, digits)
+        lan_cur = lan_target
+        pj.Lib.instance().recorder_destroy(self.rec_id)
+
+        if output:
+            os.killpg(os.getpgid(output.pid), signal.SIGKILL)
+            print "kill sclice [", output.pid, "]"
+
+        #pj.Lib.instance().recorder_destroy(self.rec_id)
+
+        recv_name = username + ".wav"
+        call('rm %s'%(recv_name), shell=True)
+        call('rm %s*.wav'%(username), shell=True)
+        call('rm %s*.mp3'%(username), shell=True)
+        call('rm %s*.log'%(username), shell=True)
+
+        self.rec_id = pj.Lib.instance().create_recorder(recv_name)
+        rec_slot = pj.Lib.instance().recorder_get_slot(self.rec_id)
+        pj.Lib.instance().conf_connect(call_slot, rec_slot)
+        current_recv_id = self.rec_id
+
+        ua_status = "Switch"
 
     # Notification when call state has changed
     def on_state(self):
@@ -391,7 +409,7 @@ try:
             print "send back prepared info from %s"%infofile
             if os.path.exists(infofile) == True:
                 h_file = open(infofile)
-                ua_playback(h_file.readlines()[0])
+                ua_playback(getPreWav(h_file.readlines()[0]))
                 #for line in h_file.readlines():
                     #ua_sendmsg(getSrc(line))
                 #    ua_playback(getPreWav(line))
@@ -402,7 +420,7 @@ try:
             print "send back switch info from %s"%switchfile
             if os.path.exists(switchfile) == True:
                 s_file = open(switchfile)
-                ua_playback(s_file.readlines()[1])
+                ua_playback(getPreWav(s_file.readlines()[1]))
                 s_file.close()
             lan_target = lan_source
             lan_source = lan_cur

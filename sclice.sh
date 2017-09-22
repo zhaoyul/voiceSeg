@@ -53,16 +53,19 @@ then
     MAX_TIME=3
 fi
 
-python bin_tail.py $WAV_FILE | auditok -r $RATE -m $MAX_TIME -s 0.3 -e 30 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &
-
-tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | unbuffer -p grep -v tran | xargs -I {} python3 wavToText.py {} $FROM_LANG $TO_LANG $RATE
-
 reconfig ()
 {
     TEMP=$FROM_LANG
     FROM_LANG=$TO_LANG
     TO_LANG=$TEMP
     echo 'exchange language input:' $FROM_LANG  ' output:' $TO_LANG
+    > $LOG_FILE
+    > $RESULT_FILE
 }
 
-trap "  reconfig " SIGTERM
+trap "  reconfig " SIGTERM SIGINT
+
+
+python bin_tail.py $WAV_FILE | auditok -r $RATE -m $MAX_TIME -s 0.3 -e 30 -n 0.5 -i - -o "$CALL_ID""_{N}_{start}-{end}.wav"  --debug-file $LOG_FILE &
+
+tail -f $LOG_FILE | unbuffer -p grep -o $CALL_ID.*.wav | unbuffer -p grep -v tran | xargs -I {} python3 wavToText.py {} $FROM_LANG $TO_LANG $RATE
