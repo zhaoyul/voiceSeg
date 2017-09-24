@@ -50,7 +50,7 @@ then
     MAX_TIME=50
     else
     RATE=8000
-    MAX_TIME=3
+    MAX_TIME=50
 fi
 
 reconfig ()
