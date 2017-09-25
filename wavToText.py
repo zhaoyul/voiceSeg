@@ -161,6 +161,17 @@ if __name__ == '__main__':
         q = ms_reg(wav_file, fromLang, rate)
         log.debug('%s 微软识别结束', wav_file)
 
+    call_translate = call_id + "_result.log"
+    file_object = open(call_translate, "a")
+    try:
+       fast_return_dict = {'fastReturn':1,
+                           'src':q}
+       file_object.writelines([json.dumps(fast_return_dict),'\n'] )
+    finally:
+       file_object.close( )
+
+    log.debug("%s 返回识别文本:%s", wav_file, q)
+
     ws = getWs()
     # send out the asr result
     send_ws_msg(ws, call_id, 'asr', q)
@@ -182,9 +193,7 @@ if __name__ == '__main__':
                 'salt':str(salt),
                 'sign':sign
               }
-
-    src=''
-    dst=''
+    log.debug('%s 百度翻译参数%s', wav_file, str(payload))
     trans_result=''
     try:
         log.debug('%s 百度翻译开始', wav_file)
@@ -201,13 +210,10 @@ if __name__ == '__main__':
             # send out the tts file name
             #send_ws_msg(ws, call_id, 'tts', tran_wav_file)
     except Exception as e:
-        log.error('百度翻译一场:%s', e)
-
-
-    call_translate = re.split("_", wav_file)[0] + "_result.log"
-    file_object = open(call_translate, "a")
+        log.error('百度翻译异常:%s', e)
     try:
        trans_result["tran_wav_file"] = tran_wav_file
+       trans_result["fastReturn"] = 0
        file_object.writelines([json.dumps(trans_result),'\n'] )
     finally:
        file_object.close( )

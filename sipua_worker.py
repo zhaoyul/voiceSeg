@@ -300,6 +300,11 @@ def getPreWav(line):
     decode_json = json.loads(str_line)
     return './tts_tones/%s'%(decode_json['wav'])
 
+def getModeFlag(line):
+    str_line =  line.rstrip('\r\n')
+    decode_json = json.loads(str_line)
+    return decode_json['fastReturn']
+
 def ua_sendmsg(text):
     global ua_status
     global ua_info
@@ -464,11 +469,13 @@ try:
                         h_file = open(binfile)
                         h_file.seek(fsize)
                         for line in h_file.readlines():
-                            ua_sendmsg(getSrc(line))
-                            time.sleep(0.1)
-                            ua_sendmsg(getDst(line))
-                            time.sleep(0.1)
-                            ua_playback(getWav(line))
+                            if(getModeFlag(line)==1):
+                                ua_sendmsg(getSrc(line))
+                                time.sleep(0.1)
+                                ua_sendmsg(getDst(line))
+                                time.sleep(0.1)
+                            else:
+                                ua_playback(getWav(line))
                         h_file.close()
                         fsize = current_fsize
                 time.sleep(0.2)
