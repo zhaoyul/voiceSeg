@@ -163,12 +163,6 @@ if __name__ == '__main__':
 
     call_translate = call_id + "_result.log"
     file_object = open(call_translate, "a")
-    try:
-       fast_return_dict = {'fastReturn':1,
-                           'src':q}
-       file_object.writelines([json.dumps(fast_return_dict),'\n'] )
-    finally:
-       file_object.close( )
 
     log.debug("%s 返回识别文本:%s", wav_file, q)
 
@@ -201,6 +195,14 @@ if __name__ == '__main__':
         if response.status_code == 200:
             src = response.json()["trans_result"][0]["src"]
             dst = response.json()["trans_result"][0]["dst"]
+            try:
+                fast_return_dict = {'fastReturn':1,
+                                    'src':src,
+                                    'dst':dst}
+                file_object.writelines([json.dumps(fast_return_dict),'\n'] )
+                file_object.flush()
+            finally:
+                pass
             log.debug('%s baidu result:', dst)
             # send out the asr result
             #send_ws_msg(ws, call_id, 'tran', dst)

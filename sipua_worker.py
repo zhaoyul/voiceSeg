@@ -311,7 +311,8 @@ def ua_sendmsg(text):
     global ua_buddy
 
     msg = text.encode('utf-8')
-    print "send back message: ", msg
+    timestr = str(datetime.now())
+    print "send back message at [%s]:"%(timestr), msg
 
     if ua_buddy:
         ua_buddy.send_pager(msg)
@@ -473,7 +474,6 @@ try:
                                 ua_sendmsg(getSrc(line))
                                 time.sleep(0.1)
                                 ua_sendmsg(getDst(line))
-                                time.sleep(0.1)
                             else:
                                 ua_playback(getWav(line))
                         h_file.close()
