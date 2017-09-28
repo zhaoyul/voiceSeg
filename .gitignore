@@ -4,5 +4,6 @@
 *.swp
 *.swo
 *.bk
+*.pyc
 logs/*
 ua.cfg

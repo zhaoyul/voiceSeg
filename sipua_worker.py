@@ -134,30 +134,25 @@ class MyCallCallback(pj.CallCallback):
 
         if digits == "#":
             print "Expected digit"
+            lan_cur = lan_target
+            pj.Lib.instance().recorder_destroy(self.rec_id)
+            if output:
+                os.killpg(os.getpgid(output.pid), signal.SIGKILL)
+                print "kill sclice [", output.pid, "]"
+            recv_name = username + ".wav"
+            call('rm %s'%(recv_name), shell=True)
+            call('rm %s*.wav'%(username), shell=True)
+            call('rm %s*.mp3'%(username), shell=True)
+            call('rm %s*.log'%(username), shell=True)
+
+            self.rec_id = pj.Lib.instance().create_recorder(recv_name)
+            rec_slot = pj.Lib.instance().recorder_get_slot(self.rec_id)
+            pj.Lib.instance().conf_connect(call_slot, rec_slot)
+            current_recv_id = self.rec_id
+            ua_status = "Switch"
+
         else:
             print "Not Expected digit"
-
-        lan_cur = lan_target
-        pj.Lib.instance().recorder_destroy(self.rec_id)
-
-        if output:
-            os.killpg(os.getpgid(output.pid), signal.SIGKILL)
-            print "kill sclice [", output.pid, "]"
-
-        #pj.Lib.instance().recorder_destroy(self.rec_id)
-
-        recv_name = username + ".wav"
-        call('rm %s'%(recv_name), shell=True)
-        call('rm %s*.wav'%(username), shell=True)
-        call('rm %s*.mp3'%(username), shell=True)
-        call('rm %s*.log'%(username), shell=True)
-
-        self.rec_id = pj.Lib.instance().create_recorder(recv_name)
-        rec_slot = pj.Lib.instance().recorder_get_slot(self.rec_id)
-        pj.Lib.instance().conf_connect(call_slot, rec_slot)
-        current_recv_id = self.rec_id
-
-        ua_status = "Switch"
 
     # Notification when call state has changed
     def on_state(self):
