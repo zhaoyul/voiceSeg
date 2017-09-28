@@ -131,6 +131,12 @@ class MyCallCallback(pj.CallCallback):
         global call_slot
         global current_recv_id
         print "MyCall %s: receiving dtmf [%s]"%(username, digits)
+
+        if digits == "#":
+            print "Expected digit"
+        else:
+            print "Not Expected digit"
+
         lan_cur = lan_target
         pj.Lib.instance().recorder_destroy(self.rec_id)
 
